@@ -4,11 +4,14 @@ import mongoose from 'mongoose';
 // defines the font schema in MongoDB
 const fontSchema = new mongoose.Schema({
   name: String,
-  weight: String,
+  family: String,
   style: String,
+  weight: String,
+  fullName: String,
+  postscriptName: String,
+  copyright: String, // license info
   originalFile: String,
-  convertedFile: String,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 // creates a model method using mongoose for DB manipulation
 const Font = mongoose.model('Font', fontSchema);

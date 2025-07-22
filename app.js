@@ -1,28 +1,27 @@
-// imports: express, cors, mongoose, dotenv & fontRoutes
-import express from 'express'; // enables HTTP server
-import cors from 'cors'; // enables CORS
-import mongoose from 'mongoose'; // enables MongoDB
-import dotenv from 'dotenv'; // loads .env file
-import fontRoutes from './routes/fontRoutes.js'; // enable API endpoints for font upload
+// app.js
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+import fontRoutes from './routes/fontRoutes.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000; // defaults to port 4000
+const PORT = process.env.PORT || 4000;
 
-// middleware
+// Middleware
 app.use(cors());
-app.use(express.json()); // express can parse JSON
+app.use(express.json());
 
-// font routes defined
-app.use('/api/fonts', fontRoutes);
+// Use font routes at /api/fonts
+app.use('/api/fonts', fontRoutes); // ⬅️ This is key
 
-// mongoDB connection
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected')) // console message - works
-  .catch(err => console.error('MongoDB connection error:', err)); // console message - not working
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// starts the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
