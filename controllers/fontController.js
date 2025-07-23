@@ -2,8 +2,11 @@ import Font from '../models/fontModel.js';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import * as fontkit from 'fontkit';
+ // ✅ Proper fontkit import
 dotenv.config();
 
+// AWS S3 setup
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -12,11 +15,10 @@ const s3 = new S3Client({
   },
 });
 
-// Generate a random filename to avoid collisions
+// Helper to generate unique filename
 const generateFileName = (originalName) => {
   const ext = originalName.split('.').pop();
-  const uniqueName = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
-  return uniqueName;
+  return `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
 };
 
 // 📤 Upload font to S3 and extract metadata
@@ -32,9 +34,7 @@ export const uploadFont = async (req, res) => {
   let metadata = {};
 
   try {
-    const { default: fontkit } = await import('fontkit');
     const font = fontkit.create(fileBuffer);
-
 
     metadata = {
       family: font.familyName || '',
@@ -49,7 +49,6 @@ export const uploadFont = async (req, res) => {
   }
 
   try {
-    // Upload to S3
     await s3.send(new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: fileName,
@@ -97,7 +96,6 @@ export const deleteFont = async (req, res) => {
       return res.status(404).json({ message: 'Font not found' });
     }
 
-    // Delete from S3
     await s3.send(new DeleteObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME,
       Key: font.originalFile,
