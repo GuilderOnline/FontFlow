@@ -1,12 +1,12 @@
 import Font from '../models/fontModel.js';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import * as fontkit from 'fontkit';
- // ✅ Proper fontkit import
+
 dotenv.config();
 
-// AWS S3 setup
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -15,7 +15,6 @@ const s3 = new S3Client({
   },
 });
 
-// Helper to generate unique filename
 const generateFileName = (originalName) => {
   const ext = originalName.split('.').pop();
   return `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
@@ -64,11 +63,17 @@ export const uploadFont = async (req, res) => {
 
     await fontDoc.save();
 
+    const signedUrl = await getSignedUrl(s3, new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileName,
+    }), { expiresIn: 3600 });
+
     return res.status(200).json({
       message: 'Font uploaded successfully.',
       filename: originalName,
       s3Key: fileName,
       metadata,
+      url: signedUrl,
     });
   } catch (err) {
     console.error('❌ Upload error:', err);
@@ -80,7 +85,20 @@ export const uploadFont = async (req, res) => {
 export const getAllFonts = async (req, res) => {
   try {
     const fonts = await Font.find().sort({ createdAt: -1 });
-    res.status(200).json(fonts);
+
+    const fontsWithUrls = await Promise.all(fonts.map(async (font) => {
+      const signedUrl = await getSignedUrl(s3, new GetObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: font.originalFile,
+      }), { expiresIn: 3600 });
+
+      return {
+        ...font.toObject(),
+        url: signedUrl,
+      };
+    }));
+
+    res.status(200).json(fontsWithUrls);
   } catch (err) {
     console.error('❌ Fetch error:', err);
     res.status(500).json({ message: 'Error fetching fonts' });
