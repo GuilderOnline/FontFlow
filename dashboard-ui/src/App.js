@@ -1,25 +1,37 @@
+// src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
 import UploadPage from './pages/UploadPage';
 import LoginPage from './pages/LoginPage';
-import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
+import { useAuth } from './context/AuthContext';
+import ProjectsPage from './pages/ProjectsPage';
+import APIKeysPage from './pages/APIKeysPage';
+import SettingsPage from './pages/SettingsPage';
+
 
 function App() {
+  const { token } = useAuth();
+
   return (
     <Router>
-      <Navbar />
-      <div className="main-layout">
-        <Sidebar />
-        <div className="main-content">
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/upload" element={<UploadPage />} />
-            <Route path="/login" element={<LoginPage />} />
-          </Routes>
-        </div>
-      </div>
+      {token ? (
+        <Routes>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/upload" element={<UploadPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/apikeys" element={<APIKeysPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      ) : (
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      )}
     </Router>
   );
 }

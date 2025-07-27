@@ -1,0 +1,23 @@
+/* src/css/projects.css */
+.project-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.project-item {
+  font-size: 1.1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.project-item .check {
+  color: #0a84ff;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
