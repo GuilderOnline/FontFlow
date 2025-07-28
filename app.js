@@ -8,21 +8,22 @@ import helmet from 'helmet';
 import fontRoutes from './routes/fontRoutes.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/authRoutes.js';
+import projectsRoutes from './routes/projectsRoutes.js';
 
 dotenv.config();
 
-
-const app = express();
+const app = express(); // ✅ MUST come before any app.use()
 const PORT = process.env.PORT || 4000;
 
 // ✅ Global Middleware
-app.use(cors());
-app.use(express.json());         // Must come before routes to parse JSON
-app.use(helmet());               // Adds security headers
+app.use(cors({ origin: 'http://localhost:3000' })); // ✅ CORS for React frontend
+app.use(express.json());
+app.use(helmet());
 
 // ✅ Routes
-app.use('/api/auth', authRoutes);                // Login routes
-app.use('/api/fonts', apiLimiter, fontRoutes);   // Font API + rate limiter
+app.use('/api/auth', authRoutes);
+app.use('/api/fonts', apiLimiter, fontRoutes);
+app.use('/api/projects', projectsRoutes); // ✅ This line was moved below app = express()
 
 // ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
@@ -33,4 +34,3 @@ mongoose.connect(process.env.MONGO_URI)
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
-app.use(cors({ origin: 'http://localhost:3000' }));

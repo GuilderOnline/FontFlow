@@ -8,6 +8,13 @@ const DashboardPage = () => {
   const { user, token } = useAuth();
   const [fonts, setFonts] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
+  const [previewFont, setPreviewFont] = useState(null);
+  const [previewText, setPreviewText] = useState('The quick brown fox jumps over the lazy dog');
+  const [fontSize, setFontSize] = useState(48);
+  const [color, setColor] = useState('#000000');
+  const [bgColor, setBgColor] = useState('#ffffff');
+  const [lineHeight, setLineHeight] = useState(1.4);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   useEffect(() => {
     const fetchFonts = async () => {
@@ -22,9 +29,24 @@ const DashboardPage = () => {
         console.error('❌ Error fetching fonts:', err);
       }
     };
-
     fetchFonts();
   }, [user, token]);
+
+  useEffect(() => {
+    if (!previewFont) return;
+
+    setFontLoaded(false);
+    console.log('🧐 Trying to load font from URL:', previewFont.url);
+
+    const fontFace = new FontFace(previewFont.fullName, `url(${previewFont.url})`);
+    fontFace.load().then((loaded) => {
+      document.fonts.add(loaded);
+      setFontLoaded(true);
+      console.log(`✅ Font ${previewFont.fullName} loaded`);
+    }).catch((err) => {
+      console.error(`❌ Failed to load font ${previewFont.fullName}:`, err);
+    });
+  }, [previewFont]);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -61,14 +83,36 @@ const DashboardPage = () => {
   const deleteFont = async (id) => {
     try {
       await axios.delete(`http://localhost:4000/api/fonts/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setFonts((prev) => prev.filter((font) => font._id !== id));
     } catch (err) {
       console.error('❌ Error deleting font:', err);
     }
+  };
+
+  const openPreview = (font) => {
+    const fontUrl = `https://fontflowbucket.s3.eu-north-1.amazonaws.com/${font.originalFile}`;
+    const fontName = font.family || font.fullName || font.name;
+
+    console.log('📦 Font object received:', font);
+    console.log('🌐 Using font URL:', fontUrl);
+
+    setPreviewFont({
+      ...font,
+      url: fontUrl,
+      fullName: fontName,
+    });
+
+    setPreviewText('The quick brown fox jumps over the lazy dog');
+    setFontSize(48);
+    setColor('#000000');
+    setBgColor('#ffffff');
+    setLineHeight(1.4);
+  };
+
+  const closePreview = () => {
+    setPreviewFont(null);
   };
 
   return (
@@ -96,7 +140,7 @@ const DashboardPage = () => {
                 <th onClick={() => handleSort('manufacturer')}>Manufacturer {getSortIndicator('manufacturer')}</th>
                 <th onClick={() => handleSort('license')}>License {getSortIndicator('license')}</th>
                 <th onClick={() => handleSort('createdAt')}>Created At {getSortIndicator('createdAt')}</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -110,6 +154,7 @@ const DashboardPage = () => {
                   <td>{font.license}</td>
                   <td>{new Date(font.createdAt).toLocaleString()}</td>
                   <td>
+                    <button onClick={() => openPreview(font)}>Preview</button>{' '}
                     <button onClick={() => deleteFont(font._id)}>Delete</button>
                   </td>
                 </tr>
@@ -117,6 +162,60 @@ const DashboardPage = () => {
             </tbody>
           </table>
         </div>
+
+        {previewFont && (
+          <div className="font-preview-overlay" onClick={closePreview}>
+            <div className="font-preview-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="preview-controls">
+                <label>
+                  Text:
+                  <input value={previewText} onChange={(e) => setPreviewText(e.target.value)} />
+                </label>
+                <label>
+                  Size:
+                  <input
+                    type="number"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                  />
+                </label>
+                <label>
+                  Text Color:
+                  <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+                </label>
+                <label>
+                  Background:
+                  <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
+                </label>
+                <label>
+                  Line Height:
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1"
+                    value={lineHeight}
+                    onChange={(e) => setLineHeight(Number(e.target.value))}
+                  />
+                </label>
+                <button onClick={closePreview}>Close</button>
+              </div>
+
+              <div
+                className="preview-area"
+                style={{
+                  fontFamily: `'${previewFont.fullName}'`,
+                  fontSize: `${fontSize}px`,
+                  color,
+                  backgroundColor: bgColor,
+                  lineHeight,
+                  padding: '2rem',
+                }}
+              >
+                {!fontLoaded ? 'Loading font...' : previewText}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/upload" element={<UploadPage />} />
+          <Route path="/projects/:projectId" element={<ProjectsPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/apikeys" element={<APIKeysPage />} />
           <Route path="/settings" element={<SettingsPage />} />

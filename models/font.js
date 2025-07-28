@@ -1,18 +1,19 @@
-// imports mongoose module to connect with MongoDB
+// models/font.js
 import mongoose from 'mongoose';
 
-// defines the font schema in MongoDB
 const fontSchema = new mongoose.Schema({
-  name: String,
-  family: String,
+  fullName: String,
   style: String,
   weight: String,
-  fullName: String,
-  postscriptName: String,
-  copyright: String, // license info
+  description: String,
+  manufacturer: String,
+  license: String,
   originalFile: String,
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
   createdAt: { type: Date, default: Date.now },
 });
-// creates a model method using mongoose for DB manipulation
-const Font = mongoose.model('Font', fontSchema);
+
+// Prevent OverwriteModelError in dev mode (e.g. Vite or Nodemon hot reload)
+const Font = mongoose.models.Font || mongoose.model('Font', fontSchema);
 export default Font;
