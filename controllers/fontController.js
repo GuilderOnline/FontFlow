@@ -4,6 +4,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import * as fontkit from 'fontkit';
+import Project from '../models/projects.js'; // 👈 Add this
+
 
 dotenv.config();
 
@@ -31,6 +33,7 @@ export const uploadFont = async (req, res) => {
   const fileBuffer = req.file.buffer;
   const originalName = req.file.originalname;
   const fileName = generateFileName(originalName);
+  const { projectId } = req.body; // 👈 optional project association
 
   let metadata = {};
 

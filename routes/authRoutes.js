@@ -34,12 +34,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-    // ✅ Generate JWT
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+  { id: user._id, role: user.role },  // ✅ use "id"
+  process.env.JWT_SECRET,
+  { expiresIn: '1h' }
+);
+console.log('🎟️ JWT payload:', { id: user._id, role: user.role });
+console.log('🔐 JWT token:', token);
 
     // 🎉 Success
     return res.json({

@@ -12,6 +12,11 @@ const fontSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
   createdAt: { type: Date, default: Date.now },
+  // Optional extras for mobile or offline use:
+  ttfUrl: { type: String },                         // S3 URL to .ttf for native app use
+  otfUrl: { type: String },                         // Optional fallback or alternative format
+  bundleUrl: { type: String },                      // Optional ZIP for offline use
+  tags: [{ type: String }],                         // e.g., ["web", "ios", "android"]
 });
 
 // Prevent OverwriteModelError in dev mode (e.g. Vite or Nodemon hot reload)

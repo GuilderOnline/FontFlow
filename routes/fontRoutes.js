@@ -21,7 +21,7 @@ router.get('/admin-only', authenticate, authorizeRoles('admin'), (req, res) => {
 router.post('/upload', jwtAuth, upload.single('font'), uploadFont);
 
 // 📄 Get all fonts (Requires API key)
-router.get('/', apiKeyAuth, getAllFonts);
+router.get('/', jwtAuth, getAllFonts); // ✅ change to JWT auth for logged-in users
 
 // 🗑️ Delete a font (Requires JWT auth)
 router.delete('/:id', jwtAuth, deleteFont);
