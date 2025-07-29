@@ -1,51 +1,41 @@
 // app.js
 import express from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import helmet from 'helmet';
 
-import connectDB from './config/db.js';
 import fontRoutes from './routes/fontRoutes.js';
-import projectRoutes from './routes/projectsRoutes.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
+import authRoutes from './routes/authRoutes.js';
+import projectsRoutes from './routes/projectsRoutes.js';
 import publicFontRoutes from './routes/publicFontRoutes.js';
 
-// Load env variables
+
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+const app = express(); // ✅ MUST come before any app.use()
+const PORT = process.env.PORT || 4000;
 
-const app = express();
-
-// Middleware
+// ✅ Global Middleware
+app.use(cors({ origin: 'http://localhost:3000' })); // ✅ CORS for React frontend
 app.use(express.json());
-app.use(cors());
-if (process.env.NODE_ENV !== 'production') {
-  app.use(morgan('dev'));
-}
+app.use(helmet());
 
-// ===== ROUTES =====
 
-// Secure API routes
-app.use('/api/fonts', fontRoutes);       // Fonts CRUD
-app.use('/api/projects', projectRoutes); // Projects CRUD
+// ✅ Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/fonts', apiLimiter, fontRoutes);
+app.use('/api/projects', projectsRoutes); // ✅ This line was moved below app = express()
+app.use('/api', publicFontRoutes);
 
-// Public font CSS route
-app.use('/', publicFontRoutes); // e.g. /projects/:slug/fonts.css
 
-// Test root
-app.get('/', (req, res) => {
-  res.send('FontFlow API is running...');
-});
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Error handling middleware (optional but useful)
-app.use((err, req, res, next) => {
-  console.error('❌ Server Error:', err);
-  res.status(500).json({ message: 'Server Error', error: err.message });
-});
-
-// Start server
-const PORT = process.env.PORT || 5000;
+// ✅ Start Server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

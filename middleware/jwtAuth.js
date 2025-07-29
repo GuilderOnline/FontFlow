@@ -1,7 +1,8 @@
 // middleware/jwtAuth.js
 import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
 
-export const jwtAuth = (req, res, next) => {
+export const jwtAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,10 +14,15 @@ export const jwtAuth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔧 Updated to support both `userId` and `id` formats
+    // Find the user in DB to be 100% sure
+    const user = await User.findById(decoded.id || decoded.userId).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
     req.user = {
-      id: decoded.userId || decoded.id, // ← FIXED HERE
-      role: decoded.role
+      id: user._id.toString(),
+      role: user.role
     };
 
     next();

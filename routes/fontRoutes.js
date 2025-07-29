@@ -1,33 +1,31 @@
 // routes/fontRoutes.js
 import express from 'express';
-import multer from 'multer';
-
 import { uploadFont, deleteFont, getAllFonts } from '../controllers/fontController.js';
+import apiKeyAuth from '../middleware/apiKeyAuth.js';
 import { jwtAuth } from '../middleware/jwtAuth.js';
+import multer from 'multer';
 import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
 import Font from '../models/fontModel.js';
 
-const router = express.Router();
+
+const router = express.Router(); // ✅ Initialize router before use
+
 const upload = multer({ storage: multer.memoryStorage() });
 
-/**
- * ADMIN-ONLY TEST ROUTE
- * Example: GET /api/fonts/admin-only
- */
+// 🔐 Admin-only route (protected by JWT and role check)
 router.get('/admin-only', authenticate, authorizeRoles('admin'), (req, res) => {
   res.send('Only admins can see this.');
 });
 
-/**
- * UPLOAD FONT
- * POST /api/fonts/upload
- */
+// 📤 Upload font (Requires JWT auth)
 router.post('/upload', jwtAuth, upload.single('font'), uploadFont);
 
-/**
- * GET ALL USER FONTS
- * GET /api/fonts/user
- */
+// 📄 Get all fonts (Requires API key)
+router.get('/', jwtAuth, getAllFonts); // ✅ change to JWT auth for logged-in users
+
+// 🗑️ Delete a font (Requires JWT auth)
+router.delete('/:id', jwtAuth, deleteFont);
+
 router.get('/user', jwtAuth, async (req, res) => {
   try {
     const fonts = await Font.find({ user: req.user.id }).sort({ createdAt: -1 });
@@ -38,10 +36,5 @@ router.get('/user', jwtAuth, async (req, res) => {
   }
 });
 
-/**
- * DELETE FONT BY ID
- * DELETE /api/fonts/:id
- */
-router.delete('/:id', jwtAuth, deleteFont);
 
 export default router;

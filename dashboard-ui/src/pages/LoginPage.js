@@ -49,8 +49,8 @@ const LoginPage = () => {
       <header className="login-header">
         <div className="logo">🔵 Font Flow</div>
         <nav>
-          <p>About</p>
-          <p>Pricing</p>
+          <a href="#">About</a>
+          <a href="#">Pricing</a>
           <button className="login-link">Login</button>
         </nav>
       </header>
@@ -86,7 +86,7 @@ const LoginPage = () => {
             />
 
             <div className="forgot">
-              <p>Forgot password?</p>
+              <a href="#">Forgot password?</a>
             </div>
 
             {error && <p className="error-message">{error}</p>}
