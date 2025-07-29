@@ -4,6 +4,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// 🔹 Load backend base URL from environment, fallback to localhost for dev
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +22,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/login', {
+      const response = await axios.post(`${API_BASE}/api/auth/login`, {
         email,
         password,
       });
@@ -27,9 +30,8 @@ const LoginPage = () => {
       const { token, user } = response.data;
       console.log('✅ Login success:', { token, user });
 
-      login(token, user); // ⬅️ store token + user in context/localStorage
+      login(token, user);
 
-      // ✅ Delay to allow context state to update
       setTimeout(() => {
         if (user.role === 'admin') {
           navigate('/dashboard');
@@ -49,10 +51,8 @@ const LoginPage = () => {
       <header className="login-header">
         <div className="logo">🔵 Font Flow</div>
         <nav>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-          <a href="#" onClick={(e) => e.preventDefault()}>About</a>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-          <a href="#" onClick={(e) => e.preventDefault()}>Pricing</a>
+          <a href="#">About</a>
+          <a href="#">Pricing</a>
           <button className="login-link">Login</button>
         </nav>
       </header>
@@ -88,8 +88,7 @@ const LoginPage = () => {
             />
 
             <div className="forgot">
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a href="#" onClick={(e) => e.preventDefault()}>Forgot password?</a>
+              <a href="#">Forgot password?</a>
             </div>
 
             {error && <p className="error-message">{error}</p>}
