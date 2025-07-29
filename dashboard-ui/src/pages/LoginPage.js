@@ -49,8 +49,10 @@ const LoginPage = () => {
       <header className="login-header">
         <div className="logo">🔵 Font Flow</div>
         <nav>
-          <a href="#">About</a>
-          <a href="#">Pricing</a>
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          <a href="#" onClick={(e) => e.preventDefault()}>About</a>
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          <a href="#" onClick={(e) => e.preventDefault()}>Pricing</a>
           <button className="login-link">Login</button>
         </nav>
       </header>
@@ -86,7 +88,8 @@ const LoginPage = () => {
             />
 
             <div className="forgot">
-              <a href="#">Forgot password?</a>
+              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+              <a href="#" onClick={(e) => e.preventDefault()}>Forgot password?</a>
             </div>
 
             {error && <p className="error-message">{error}</p>}
