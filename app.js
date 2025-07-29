@@ -18,7 +18,14 @@ const app = express(); // ✅ MUST come before any app.use()
 const PORT = process.env.PORT || 4000;
 
 // ✅ Global Middleware
-app.use(cors({ origin: 'http://localhost:3000' })); // ✅ CORS for React frontend
+app.use(cors({
+  origin: [
+    'http://localhost:3000',           // Local dev frontend
+    'https://font-flow.vercel.app'     // Vercel frontend
+  ],
+  credentials: true
+}));
+ // ✅ CORS for React frontend
 app.use(express.json());
 app.use(helmet());
 
