@@ -1,0 +1,71 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.preview-textarea {
+  width: 100%;
+  height: 200px;
+  resize: vertical;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+
+.controls label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.controls input {
+  margin-left: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.close-btn {
+  background: #ddd;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.font-preview-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.font-preview-modal {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
