@@ -78,7 +78,7 @@ export const uploadFont = async (req, res) => {
     const fontDoc = new Font({
       name: originalName,
       originalFile: fileName,
-      user: req.user.userId,
+      user: req.user.id,
       ...metadata,
     });
 
@@ -106,7 +106,7 @@ export const uploadFont = async (req, res) => {
 // 📄 Get Fonts for Logged-In User
 export const getAllFonts = async (req, res) => {
   try {
-    const fonts = await Font.find({ user: req.user.userId }).sort({ createdAt: -1 });
+    const fonts = await Font.find({ user: req.user.id }).sort({ createdAt: -1 });
 
     const fontsWithUrls = await Promise.all(fonts.map(async (font) => {
       const signedUrl = await getSignedUrl(s3, new GetObjectCommand({

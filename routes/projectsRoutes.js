@@ -1,13 +1,25 @@
+// routes/projects.js
+
 import express from 'express';
 import Project from '../models/projects.js';
 import Font from '../models/font.js';
 import ApiKey from '../models/APIKey.js';
 import slugify from 'slugify';
 import { jwtAuth } from '../middleware/jwtAuth.js';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const router = express.Router();
 
-// ✅ GET /api/projects (secured)
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+// ✅ GET /api/projects
 router.get('/', jwtAuth, async (req, res) => {
   try {
     const projects = await Project.find({ userId: req.user.id }).populate('fonts');
@@ -39,13 +51,10 @@ router.get('/:id/apikeys', jwtAuth, async (req, res) => {
   }
 });
 
-// ✅ POST /api/projects – Create new project
+// ✅ POST /api/projects
 router.post('/', jwtAuth, async (req, res) => {
   try {
-    console.log('📥 Incoming body:', req.body);
-    console.log('🧠 req.user:', req.user); // ✅ Add this line to inspect the authenticated user
-
-    const { name } = req.body;
+    const { name, url, description } = req.body;
     if (!name) return res.status(400).json({ error: 'Project name is required' });
 
     const slug = slugify(name, { lower: true, strict: true });
@@ -53,6 +62,8 @@ router.post('/', jwtAuth, async (req, res) => {
     const project = new Project({
       name,
       slug,
+      url,
+      description,
       userId: req.user.id,
       fonts: [],
     });
@@ -65,7 +76,7 @@ router.post('/', jwtAuth, async (req, res) => {
   }
 });
 
-// ✅ POST /api/projects/:id/fonts – Add font to project
+// ✅ POST /api/projects/:id/fonts
 router.post('/:id/fonts', jwtAuth, async (req, res) => {
   try {
     const { fontId } = req.body;
@@ -84,7 +95,7 @@ router.post('/:id/fonts', jwtAuth, async (req, res) => {
   }
 });
 
-// ✅ DELETE /api/projects/:id/fonts/:fontId – Remove font from project
+// ✅ DELETE /api/projects/:id/fonts/:fontId
 router.delete('/:id/fonts/:fontId', jwtAuth, async (req, res) => {
   try {
     const { id, fontId } = req.params;
@@ -98,6 +109,75 @@ router.delete('/:id/fonts/:fontId', jwtAuth, async (req, res) => {
   } catch (err) {
     console.error('❌ Error removing font from project:', err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ GET /api/projects/:slug/embed — Get font metadata + signed URLs
+router.get('/:slug/embed', async (req, res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug }).populate('fonts');
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const fontsWithUrls = await Promise.all(project.fonts.map(async (font) => {
+      const signedUrl = await getSignedUrl(
+        s3,
+        new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: font.originalFile,
+        }),
+        { expiresIn: 3600 }
+      );
+
+      return {
+        _id: font._id,
+        name: font.name,
+        fullName: font.fullName || font.name,
+        style: font.style,
+        weight: font.weight,
+        license: font.license,
+        url: signedUrl,
+      };
+    }));
+
+    res.json(fontsWithUrls);
+  } catch (err) {
+    console.error('❌ Error in GET /:slug/embed:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ GET /api/projects/:slug/css — Return @font-face rules for embed
+router.get('/:slug/css', async (req, res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug }).populate('fonts');
+    if (!project) return res.status(404).send('/* Project not found */');
+
+    const cssRules = await Promise.all(project.fonts.map(async (font) => {
+      const signedUrl = await getSignedUrl(
+        s3,
+        new GetObjectCommand({
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: font.originalFile,
+        }),
+        { expiresIn: 3600 }
+      );
+
+      const fontFamily = font.fullName || font.name || 'CustomFont';
+      return `
+@font-face {
+  font-family: '${fontFamily}';
+  src: url('${signedUrl}') format('truetype');
+  font-weight: ${font.weight || 'normal'};
+  font-style: ${font.style || 'normal'};
+}
+`;
+    }));
+
+    res.set('Content-Type', 'text/css');
+    res.send(cssRules.join('\n'));
+  } catch (err) {
+    console.error('❌ Error generating CSS:', err);
+    res.status(500).send('/* Error generating CSS */');
   }
 });
 
