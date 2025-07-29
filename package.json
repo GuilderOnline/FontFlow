@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "postinstall": "cd dashboard-ui && npm install && npm run build"
+    "install-client": "cd dashboard-ui && npm install",
+  "build-client": "cd dashboard-ui && npm run build",
+  "postinstall": "npm run install-client && npm run build-client"
   },
   "keywords": [],
   "author": "",

@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import API_BASE from '../utils/api';
-
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
@@ -15,14 +14,10 @@ const ProjectsPage = () => {
   const [editedProject, setEditedProject] = useState({});
   const [selectedFontIds, setSelectedFontIds] = useState({});
   const navigate = useNavigate();
-  const { user, token } = useAuth();
+  const { token } = useAuth(); // ⬅ removed `user` since unused
 
-  useEffect(() => {
-    fetchProjects();
-    fetchFonts();
-  }, []);
-
-  const fetchProjects = async () => {
+  // useCallback ensures functions are stable and can be added to dependency array
+  const fetchProjects = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE}/projects`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -33,9 +28,9 @@ const ProjectsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
-  const fetchFonts = async () => {
+  const fetchFonts = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE}/fonts/user`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,7 +39,12 @@ const ProjectsPage = () => {
     } catch (err) {
       console.error('❌ Error fetching fonts:', err);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchProjects();
+    fetchFonts();
+  }, [fetchProjects, fetchFonts]);
 
   const createProject = async () => {
     const { name, url, description } = newProject;
@@ -117,7 +117,6 @@ const ProjectsPage = () => {
   return (
     <div className="dashboard-container flex">
       <Sidebar />
-
       <div className="dashboard-content p-6 flex-1 bg-gray-50 min-h-screen">
         <h1 className="text-3xl font-bold mb-8">Projects</h1>
 
@@ -167,7 +166,6 @@ const ProjectsPage = () => {
                 key={project._id}
                 className="border border-gray-300 rounded-lg p-4 bg-white shadow-md"
               >
-                {/* Project details or edit fields */}
                 {editingId === project._id ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input
@@ -199,7 +197,7 @@ const ProjectsPage = () => {
                   </div>
                 )}
 
-                {/* Edit/Delete buttons */}
+                {/* Edit/Delete */}
                 <div className="mt-3 flex gap-4">
                   {editingId === project._id ? (
                     <button
@@ -276,7 +274,7 @@ const ProjectsPage = () => {
                     </ul>
                   )}
 
-                  {/* 🔗 Embed block */}
+                  {/* Embed block */}
                   <div className="mt-4 bg-gray-50 p-3 rounded border text-sm text-gray-800">
                     <p className="font-semibold mb-1">Embed this project:</p>
                     <p>
