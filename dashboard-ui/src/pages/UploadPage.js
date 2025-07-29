@@ -4,6 +4,10 @@ import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import '../css/style.css';
 
+// Use API base from .env or fallback to localhost for dev
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
+
 const UploadPage = () => {
   const { token } = useAuth();
   const [file, setFile] = useState(null);
@@ -28,8 +32,9 @@ const UploadPage = () => {
 
     try {
       setUploading(true);
-       console.log('🔑 Token being sent:', token);
-      const res = await axios.post('http://localhost:4000/api/fonts/upload', formData, {
+      console.log('🔑 Token being sent:', token);
+
+      const res = await axios.post(`${API_BASE_URL}/fonts/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
@@ -51,7 +56,11 @@ const UploadPage = () => {
       <div className="main-content">
         <h2>Upload a Font</h2>
         <form onSubmit={handleUpload} className="upload-form">
-          <input type="file" accept=".ttf,.otf,.woff,.woff2" onChange={handleFileChange} />
+          <input
+            type="file"
+            accept=".ttf,.otf,.woff,.woff2"
+            onChange={handleFileChange}
+          />
           <button type="submit" disabled={uploading}>
             {uploading ? 'Uploading...' : 'Upload Font'}
           </button>
