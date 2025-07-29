@@ -49,8 +49,8 @@ const LoginPage = () => {
       <header className="login-header">
         <div className="logo">🔵 Font Flow</div>
         <nav>
-          <a href="#">About</a>
-          <a href="#">Pricing</a>
+          <p>About</p>
+          <p>Pricing</p>
           <button className="login-link">Login</button>
         </nav>
       </header>
