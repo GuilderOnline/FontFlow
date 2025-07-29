@@ -86,7 +86,7 @@ const LoginPage = () => {
             />
 
             <div className="forgot">
-              <a href="#">Forgot password?</a>
+              <p>Forgot password?</p>
             </div>
 
             {error && <p className="error-message">{error}</p>}
