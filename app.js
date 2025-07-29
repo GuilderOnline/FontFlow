@@ -22,7 +22,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173", // local dev
     "https://your-frontend.vercel.app", // production frontend
-    "https://your-frontend.up.railway.app" // if hosting frontend on Railway
+    "https://fontflow-production.up.railway.app/" // if hosting frontend on Railway
   ],
   credentials: true
 }));
