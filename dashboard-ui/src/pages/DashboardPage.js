@@ -4,6 +4,10 @@ import '../css/dashboard.css';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
+// Use env var for API base (Vercel/Prod) and fallback to localhost for dev
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
+
 const DashboardPage = () => {
   const { user, token } = useAuth();
   const [fonts, setFonts] = useState([]);
@@ -16,10 +20,11 @@ const DashboardPage = () => {
   const [lineHeight, setLineHeight] = useState(1.4);
   const [fontLoaded, setFontLoaded] = useState(false);
 
+  // Fetch fonts for the logged-in user
   useEffect(() => {
     const fetchFonts = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/fonts/user`, {
+        const res = await axios.get(`${API_BASE_URL}/fonts/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -29,9 +34,12 @@ const DashboardPage = () => {
         console.error('❌ Error fetching fonts:', err);
       }
     };
-    fetchFonts();
+    if (token) {
+      fetchFonts();
+    }
   }, [user, token]);
 
+  // Load font preview dynamically
   useEffect(() => {
     if (!previewFont) return;
 
@@ -39,13 +47,16 @@ const DashboardPage = () => {
     console.log('🧐 Trying to load font from URL:', previewFont.url);
 
     const fontFace = new FontFace(previewFont.fullName, `url(${previewFont.url})`);
-    fontFace.load().then((loaded) => {
-      document.fonts.add(loaded);
-      setFontLoaded(true);
-      console.log(`✅ Font ${previewFont.fullName} loaded`);
-    }).catch((err) => {
-      console.error(`❌ Failed to load font ${previewFont.fullName}:`, err);
-    });
+    fontFace
+      .load()
+      .then((loaded) => {
+        document.fonts.add(loaded);
+        setFontLoaded(true);
+        console.log(`✅ Font ${previewFont.fullName} loaded`);
+      })
+      .catch((err) => {
+        console.error(`❌ Failed to load font ${previewFont.fullName}:`, err);
+      });
   }, [previewFont]);
 
   const handleSort = (key) => {
@@ -82,7 +93,7 @@ const DashboardPage = () => {
 
   const deleteFont = async (id) => {
     try {
-      await axios.delete(`http://localhost:4000/api/fonts/${id}`, {
+      await axios.delete(`${API_BASE_URL}/fonts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFonts((prev) => prev.filter((font) => font._id !== id));
