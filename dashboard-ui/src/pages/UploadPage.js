@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import '../css/style.css';
 
-// Use API base from .env or fallback to localhost for dev
+// ✅ Use API base from .env or fallback to localhost for dev
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
 
@@ -14,16 +14,31 @@ const UploadPage = () => {
   const [message, setMessage] = useState('');
   const [uploading, setUploading] = useState(false);
 
+  // ✅ Single file change handler with validation
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    // ✅ Allowed font extensions
+    const allowedExtensions = /\.(ttf|otf|eot|woff|woff2)$/i;
+
+    if (!allowedExtensions.test(selectedFile.name)) {
+      setMessage('❌ Wrong format. Only .ttf, .otf, .eot, .woff, or .woff2 are allowed.');
+      setFile(null);
+      e.target.value = ''; // reset file input
+      return;
+    }
+
+    setFile(selectedFile);
     setMessage('');
   };
 
+  // ✅ Upload handler
   const handleUpload = async (e) => {
     e.preventDefault();
 
     if (!file) {
-      setMessage('Please select a font file to upload.');
+      setMessage('Please select a valid font file to upload.');
       return;
     }
 
@@ -58,7 +73,7 @@ const UploadPage = () => {
         <form onSubmit={handleUpload} className="upload-form">
           <input
             type="file"
-            accept=".ttf,.otf,.woff,.woff2"
+            accept=".ttf,.otf,.eot,.woff,.woff2"
             onChange={handleFileChange}
           />
           <button type="submit" disabled={uploading}>
