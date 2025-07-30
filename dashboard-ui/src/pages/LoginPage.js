@@ -7,8 +7,8 @@ import { useAuth } from '../context/AuthContext';
 // ✅ Dynamically choose backend URL based on environment
 const API_BASE =
   process.env.NODE_ENV === 'production'
-    ? '/api' // Production → uses same-origin + Vercel rewrite
-    : 'https://font-flow-p3au.vercel.app/api'; // Dev → calls deployed backend directly 
+    ? '/api' // Will be proxied to backend by Vercel rewrite
+    : 'http://localhost:4000/api'; // Local backend for dev
 
 const LoginPage = () => {
   const { login } = useAuth();
