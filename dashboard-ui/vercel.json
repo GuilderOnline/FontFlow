@@ -4,9 +4,5 @@
     "api/app.js": {
       "runtime": "nodejs20.x"
     }
-  },
-  "routes": [
-    { "src": "/api/.*", "dest": "api/app.js" },
-    { "src": "/(.*)", "dest": "/" }
-  ]
+  }
 }
