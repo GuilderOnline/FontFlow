@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
-import serverless from 'serverless-http';
+import serverless from 'serverless-http'; 
 
 // Import your routes
 import fontRoutes from '../../routes/fontRoutes.js';
