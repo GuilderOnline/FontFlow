@@ -5,10 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // ✅ Dynamically choose backend URL based on environment
-const API_BASE =
-  process.env.NODE_ENV === 'production'
-    ? '/api' // Will be proxied to backend by Vercel rewrite
-    : 'http://localhost:4000/api'; // Local backend for dev
+const API_BASE = '/api';
+
 
 const LoginPage = () => {
   const { login } = useAuth();
