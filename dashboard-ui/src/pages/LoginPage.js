@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // 🔹 Load backend base URL from environment, fallback to localhost for dev
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000';
 
 const LoginPage = () => {
   const { login } = useAuth();
