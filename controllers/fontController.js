@@ -15,6 +15,7 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
+
 // Upload font file to S3
 export const uploadFont = async (req, res) => {
   try {
