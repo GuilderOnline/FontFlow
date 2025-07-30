@@ -2,8 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://font-flow-p3au.vercel.app/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://font-flow-p3au.vercel.app/api/:path*"
     }
   ]
 }
