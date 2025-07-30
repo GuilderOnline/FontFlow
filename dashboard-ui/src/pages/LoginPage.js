@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // ✅ Dynamically choose backend URL based on environment
-const API_BASE = '/api';
+const API_BASE = '/api'; 
 
 
 const LoginPage = () => {
