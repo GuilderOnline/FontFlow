@@ -6,7 +6,7 @@ import fs from 'fs';
 import AWS from 'aws-sdk';
 import Fontkit from 'fontkit';
 import path from 'path';
-import Font from '../models/Font.js';
+import Font from '../models/font.js';
 
 // AWS S3 configuration
 const s3 = new AWS.S3({
