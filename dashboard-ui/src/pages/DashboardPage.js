@@ -4,7 +4,6 @@ import '../css/dashboard.css';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-// Use env var for API base (Vercel/Prod) and fallback to localhost for dev
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
 
@@ -20,31 +19,29 @@ const DashboardPage = () => {
   const [lineHeight, setLineHeight] = useState(1.4);
   const [fontLoaded, setFontLoaded] = useState(false);
 
-  // Fetch fonts for the logged-in user
+  // Fetch fonts for logged-in user or all fonts for admin
   useEffect(() => {
     const fetchFonts = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/fonts/user`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const endpoint = user?.role === 'admin' ? '/fonts' : '/fonts/user';
+        const res = await axios.get(`${API_BASE_URL}${endpoint}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
         setFonts(res.data);
       } catch (err) {
         console.error('❌ Error fetching fonts:', err);
       }
     };
-    if (token) {
+
+    if (token && user) {
       fetchFonts();
     }
   }, [user, token]);
 
-  // Load font preview dynamically
+  // Load font dynamically for preview
   useEffect(() => {
     if (!previewFont) return;
-
     setFontLoaded(false);
-    console.log('🧐 Trying to load font from URL:', previewFont.url);
 
     const fontFace = new FontFace(previewFont.fullName, `url(${previewFont.url})`);
     fontFace
@@ -59,6 +56,7 @@ const DashboardPage = () => {
       });
   }, [previewFont]);
 
+  // Sorting
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -91,6 +89,7 @@ const DashboardPage = () => {
     return 0;
   });
 
+  // Delete font
   const deleteFont = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/fonts/${id}`, {
@@ -102,16 +101,13 @@ const DashboardPage = () => {
     }
   };
 
+  // Open preview modal (now using signed URL from backend)
   const openPreview = (font) => {
-    const fontUrl = `https://fontflowbucket.s3.eu-north-1.amazonaws.com/${font.originalFile}`;
     const fontName = font.family || font.fullName || font.name;
-
-    console.log('📦 Font object received:', font);
-    console.log('🌐 Using font URL:', fontUrl);
 
     setPreviewFont({
       ...font,
-      url: fontUrl,
+      url: font.url, // ✅ Use signed URL directly
       fullName: fontName,
     });
 
@@ -132,6 +128,7 @@ const DashboardPage = () => {
       <div className="dashboard-content">
         <h1>Welcome, {user?.role === 'admin' ? 'Admin' : 'User'}</h1>
 
+        {/* Summary cards */}
         <div className="summary-cards">
           <div className="card">Total Fonts: {fonts.length}</div>
           <div className="card">Plan: Pro</div>
@@ -139,6 +136,7 @@ const DashboardPage = () => {
           <div className="card">Role: {user?.role}</div>
         </div>
 
+        {/* Fonts table */}
         <div className="fonts-table">
           <h2>Recent Fonts</h2>
           <table>
@@ -174,6 +172,7 @@ const DashboardPage = () => {
           </table>
         </div>
 
+        {/* Font preview modal */}
         {previewFont && (
           <div className="font-preview-overlay" onClick={closePreview}>
             <div className="font-preview-modal" onClick={(e) => e.stopPropagation()}>
